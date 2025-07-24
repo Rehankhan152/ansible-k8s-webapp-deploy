@@ -1,0 +1,26 @@
+- name: Deploy Dockerized Web App to Kubernetes
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Build Docker image
+      docker_image:
+        path: ../docker
+        name: rehan/webapp
+        tag: latest
+        source: build
+
+    - name: Push Docker image (optional)
+      docker_image:
+        name: rehan/webapp
+        tag: latest
+        push: yes
+
+    - name: Apply Kubernetes Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '../k8s/deployment.yaml') }}"
+
+    - name: Apply Kubernetes Service
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '../k8s/service.yaml') }}"
